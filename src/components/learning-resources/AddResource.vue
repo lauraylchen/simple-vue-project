@@ -1,4 +1,23 @@
 <template>
+  <Teleport to="body">
+    <base-dialog
+      v-if="inputIsInvalid"
+      title="Invalid Input"
+      @close="confirmError"
+    >
+      <template #default>
+        <p>
+          Unfortunately, at least one input value is invalid.
+        </p>
+        <p>
+          Please check all inputs and make sure you enter at least a few characters into each input field.
+        </p>
+      </template>
+      <template #actions>
+        <base-button @click="confirmError">Okay</base-button>
+      </template>
+    </base-dialog>
+  </Teleport>
   <base-card>
     <form @submit.prevent="submitData">
       <div class="form-control">
@@ -21,13 +40,17 @@
 </template>
 
 <script>
+import BaseButton from '../UI/BaseButton.vue';
+import BaseDialog from '../UI/BaseDialog.vue';
 export default {
+  components: { BaseDialog, BaseButton },
   inject: ['addResource'],
   data() {
     return {
       titleInput: '',
       descInput: '',
-      linkInput: ''
+      linkInput: '',
+      inputIsInvalid: false
     }
   },
   methods: {
@@ -36,7 +59,19 @@ export default {
       const enteredDesc = this.descInput;
       const enteredLink = this.linkInput;
 
+      if (
+        enteredTitle.trim() === '' ||
+        enteredDesc.trim() === '' ||
+        enteredLink.trim() === ''
+      ) {
+        this.inputIsInvalid = true;
+        return;
+      }
+
       this.addResource(enteredTitle, enteredDesc, enteredLink);
+    },
+    confirmError() {
+      this.inputIsInvalid = false;
     }
   }
 }
